@@ -3,9 +3,8 @@
   and return its response.
 */
 
-import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-const openai = new OpenAI();
+import { openai } from "../util/init";
 
 // An array to hold the conversation
 const messages: ChatCompletionMessageParam[] = [

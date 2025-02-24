@@ -1,32 +1,123 @@
 /*
-  Chat completions aren't that useful alone. Function (tool) calling can make it more powerful.
+  Chat completions aren't that useful alone (unless you want to make a gpt-clone).
+  Function (tool) calling can make it more powerful.
   You typically want to use function calling when:
-    a) You want the ai to be up to date (current weather, news, prices, etc.)
+    - You want the ai to be up to date (current weather, news, prices, etc.)
+    - You want the ai to use some of your data
+    - You want the ai to be able to take actions on behalf of the user
 */
 
 import type { ChatCompletionTool } from "openai/resources/index.mjs";
+import { runChatWithTools } from "../util/runChat";
 
-const toolDefinition: ChatCompletionTool = {
+// Tools can be used for fetching data
+const get_current_weather_definition: ChatCompletionTool = {
   type: "function",
   function: {
-    name: "start_health_check",
-    description: "Send the user an adaptive card (interactive UI element) that allows them to start a health check for the given health area.",
+    name: "get_current_weather",
+    description:
+      "Fetches the current weather information for the given location.",
     parameters: {
       type: "object",
       properties: {
-        healthArea: {
+        city: {
           type: "string",
-          enum: [
-            "stress",
-            "anxiety",
-            "computer_vision_syndrome",
-            "headaches",
-            "sleeping_issues",
-          ],
-          description: "The health area to get a health plan for.",
+          enum: ["Copenhagen", "St. Anton"],
+          description: "The city to fetch weather info for.",
         },
       },
-      required: ["healthArea"],
-    };
-  };
+      required: ["city"],
+    },
+  },
 };
+
+const result = await runChatWithTools(
+  [
+    {
+      role: "user",
+      content: "Is the weather better in copenhagen or St. Anton right now",
+    },
+  ],
+  [get_current_weather_definition],
+  (name, args) => {
+    if (name === get_current_weather_definition.function.name) {
+      switch (args.city as string) {
+        case "Copenhagen":
+          return "Cold and windy as hell";
+        case "St. Anton":
+          return "-5 degrees and clear skies. Perfect weather for a ski trip";
+        default:
+          throw new Error("Invalid args");
+      }
+    }
+    throw new Error("Invalid function call");
+  },
+);
+console.log(`Result with tool calls: ${result}`);
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+console.log("Press any key to continue");
+const input = await new Promise((resolve) => {
+  process.stdin.once("data", (data) => {
+    resolve(data.toString().trim());
+  });
+});
+console.log(`
+
+
+
+`);
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+const book_ski_trip_definition: ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "book_ski_trip",
+    description: "Books a ski trip for the user in the given city.",
+    parameters: {
+      type: "object",
+      properties: {
+        city: {
+          type: "string",
+          description: "The city to fetch weather info for.",
+        },
+      },
+      required: ["city"],
+    },
+  },
+};
+
+const anotherResult = await runChatWithTools(
+  [
+    {
+      role: "user",
+      content: "If the weather is nice in St. Anton, book me a ski trip there",
+    },
+  ],
+  [get_current_weather_definition, book_ski_trip_definition],
+  (name, args) => {
+    switch (name) {
+      case get_current_weather_definition.function.name:
+        switch (args.city as string) {
+          case "Copenhagen":
+            return "Cold and windy as hell";
+          case "St. Anton":
+            return "-5 degrees and clear skies. Perfect weather for a ski trip";
+          default:
+            throw new Error("Invalid args");
+        }
+      case book_ski_trip_definition.function.name:
+        return `Ski trip for ${args.city}`;
+      default:
+        throw new Error("Invalid function call");
+    }
+  },
+);
+
+console.log(anotherResult);
