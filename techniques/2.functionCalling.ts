@@ -41,6 +41,7 @@ const result = await runChatWithTools(
   [get_current_weather_definition],
   (name, args) => {
     if (name === get_current_weather_definition.function.name) {
+      // This is where you would actually implement the function
       switch (args.city as string) {
         case "Copenhagen":
           return "Cold and windy as hell";
@@ -60,7 +61,7 @@ console.log(`Result with tool calls: ${result}`);
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 console.log("Press any key to continue");
-const input = await new Promise((resolve) => {
+await new Promise((resolve) => {
   process.stdin.once("data", (data) => {
     resolve(data.toString().trim());
   });
@@ -104,6 +105,7 @@ const anotherResult = await runChatWithTools(
   (name, args) => {
     switch (name) {
       case get_current_weather_definition.function.name:
+        // This is where you would actually implement the function
         switch (args.city as string) {
           case "Copenhagen":
             return "Cold and windy as hell";
@@ -113,6 +115,7 @@ const anotherResult = await runChatWithTools(
             throw new Error("Invalid args");
         }
       case book_ski_trip_definition.function.name:
+        // This is where you would actually implement the function
         return `Ski trip for ${args.city}`;
       default:
         throw new Error("Invalid function call");

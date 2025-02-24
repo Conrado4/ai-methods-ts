@@ -63,7 +63,6 @@ const newCompletion = await openai.chat.completions.create({
 });
 
 console.log(`assistant: ${newCompletion.choices[0].message.content}`);
-console.log("------------ Example done ------------");
 
 // To turn this into an actual chat app you basically just need to:
 // 1. Replace the messages array with some kind of storage (SQL, redis, mongo, whatever)

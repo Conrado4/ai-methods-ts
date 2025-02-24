@@ -7,3 +7,22 @@
     etc...
   Using structured output is typically pretty nice.
 */
+
+import { runChatWithStructuredOutput } from "../util/runChat";
+
+const result = await runChatWithStructuredOutput([
+  {
+    role: "developer",
+    content:
+      "Your job is to take a short sentence and write output an email. You must answer in JSON format {title: string, to: string, body: string}",
+  },
+  {
+    role: "user",
+    content:
+      "Write an email to Villy Sleepvalley (villy@sleepvalley.dk) asking him if the ice is still melting at the pooooles",
+  },
+]);
+
+console.log(result);
+
+// Then you can parse into an object and work with it in code.

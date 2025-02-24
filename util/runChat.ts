@@ -54,3 +54,15 @@ export async function runChatWithTools(
     );
   }
 }
+
+export async function runChatWithStructuredOutput(
+  messages: ChatCompletionMessageParam[],
+) {
+  const completion = await openai.chat.completions.create({
+    messages,
+    model: "gpt-4o",
+    response_format: { type: "json_object" },
+  });
+
+  return completion.choices[0].message.content;
+}
